@@ -64,9 +64,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     setCurrentUser(role);
     localStorage.setItem("currentUser", role);
 
+    const key = role.toLowerCase() as "gaetan" | "wynonaa";
     setUsers((prev) => ({
       ...prev,
-      [role.toLowerCase()]: {
+      [key]: {
         role,
         joinedAt: new Date().toISOString(),
       },
