@@ -10,8 +10,7 @@ interface ChatContextType {
   setCurrentUser: (role: UserRole) => void;
   resetUser: () => void;
   addMessage: (message: Message) => void;
-  loadData: () => void;
-  saveData: () => void;
+  loadData: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -28,20 +27,28 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = () => {
+  const loadData = async () => {
     try {
-      if (typeof window === "undefined") return;
-
-      const savedData = localStorage.getItem("chatData");
-      if (savedData) {
-        const data: ConversationData = JSON.parse(savedData);
-        setUsers(data.users);
-        setMessages(data.messages);
+      // Load messages from API
+      const messagesResponse = await fetch("/api/messages");
+      if (messagesResponse.ok) {
+        const loadedMessages = await messagesResponse.json();
+        setMessages(loadedMessages || []);
       }
 
-      const savedUser = localStorage.getItem("currentUser");
-      if (savedUser) {
-        setCurrentUser(savedUser as UserRole);
+      // Load users from API
+      const usersResponse = await fetch("/api/users");
+      if (usersResponse.ok) {
+        const loadedUsers = await usersResponse.json();
+        setUsers(loadedUsers || { gaetan: null, wynonaa: null });
+      }
+
+      // Load current user from localStorage (only for UI state, not for persistence)
+      if (typeof window !== "undefined") {
+        const savedUser = localStorage.getItem("currentUser");
+        if (savedUser) {
+          setCurrentUser(savedUser as UserRole);
+        }
       }
     } catch (error) {
       console.error("Error loading data:", error);
@@ -50,47 +57,75 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const saveData = () => {
-    try {
-      if (typeof window === "undefined") return;
-      const data: ConversationData = { users, messages };
-      localStorage.setItem("chatData", JSON.stringify(data));
-    } catch (error) {
-      console.error("Error saving data:", error);
-    }
-  };
-
   useEffect(() => {
     loadData();
+    
+    // Set up auto-refresh every 2 seconds to sync between tabs
+    const interval = setInterval(() => {
+      loadData();
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (!isLoading) {
-      saveData();
-    }
-  }, [users, messages, isLoading]);
-
-  const handleSetCurrentUser = (role: UserRole) => {
+  const handleSetCurrentUser = async (role: UserRole) => {
     setCurrentUser(role);
-    localStorage.setItem("currentUser", role);
+    
+    // Save current user to localStorage for UI persistence
+    if (typeof window !== "undefined") {
+      localStorage.setItem("currentUser", role);
+    }
 
-    const key = role.toLowerCase() as "gaetan" | "wynonaa";
-    setUsers((prev) => ({
-      ...prev,
-      [key]: {
+    // Update user in JSON database
+    const newUsers = {
+      ...users,
+      [role.toLowerCase() as "gaetan" | "wynonaa"]: {
         role,
         joinedAt: new Date().toISOString(),
       },
-    }));
+    };
+
+    try {
+      await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newUsers),
+      });
+      setUsers(newUsers);
+    } catch (error) {
+      console.error("Error updating users:", error);
+    }
   };
 
-  const handleAddMessage = (message: Message) => {
+  const handleAddMessage = async (message: Message) => {
+    // Add to local state immediately for UI responsiveness
     setMessages((prev) => [...prev, message]);
+
+    // Save to JSON database
+    try {
+      const response = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(message),
+      });
+
+      if (!response.ok) {
+        console.error("Error saving message to database");
+        // Remove from local state if save failed
+        setMessages((prev) => prev.filter((m) => m.id !== message.id));
+      }
+    } catch (error) {
+      console.error("Error saving message:", error);
+      // Remove from local state if save failed
+      setMessages((prev) => prev.filter((m) => m.id !== message.id));
+    }
   };
 
   const handleResetUser = () => {
     setCurrentUser(null);
-    localStorage.removeItem("currentUser");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("currentUser");
+    }
   };
 
   return (
@@ -103,7 +138,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
         resetUser: handleResetUser,
         addMessage: handleAddMessage,
         loadData,
-        saveData,
         isLoading,
       }}
     >
