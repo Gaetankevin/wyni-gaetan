@@ -8,6 +8,7 @@ interface ChatContextType {
   users: ConversationData["users"];
   messages: Message[];
   setCurrentUser: (role: UserRole) => void;
+  resetUser: () => void;
   addMessage: (message: Message) => void;
   loadData: () => void;
   saveData: () => void;
