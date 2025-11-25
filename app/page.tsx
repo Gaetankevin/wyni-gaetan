@@ -31,7 +31,8 @@ export default function Home() {
   };
 
   const handleChangeUser = () => {
-    setCurrentUser(null as any);
+    localStorage.removeItem("currentUser");
+    window.location.reload();
   };
 
   if (!currentUser) {
