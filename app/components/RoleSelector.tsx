@@ -1,24 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { UserRole } from "@/app/types";
 import { useChat } from "@/app/context/ChatContext";
 
 export const RoleSelector: React.FC = () => {
   const { setCurrentUser } = useChat();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-gray-600">Chargement...</div>
-      </div>
-    );
-  }
 
   const handleSelectRole = (role: UserRole) => {
     setCurrentUser(role);
