@@ -1,22 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { RoleSelector } from "@/app/components/RoleSelector";
 import { ChatWindow } from "@/app/components/ChatWindow";
 import { useChat } from "@/app/context/ChatContext";
 import { Message } from "@/app/types";
 
 export default function Home() {
-  const { currentUser, messages, addMessage, loadData, resetUser } =
+  const { currentUser, messages, addMessage, resetUser, isLoading } =
     useChat();
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    loadData();
-  }, [loadData]);
-
-  if (!mounted) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-gray-600">Initialisation...</div>
