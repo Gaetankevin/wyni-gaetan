@@ -7,7 +7,7 @@ import { useChat } from "@/app/context/ChatContext";
 import { Message } from "@/app/types";
 
 export default function Home() {
-  const { currentUser, messages, setCurrentUser, addMessage, loadData } =
+  const { currentUser, messages, addMessage, loadData, resetUser } =
     useChat();
 
   useEffect(() => {
@@ -31,8 +31,7 @@ export default function Home() {
   };
 
   const handleChangeUser = () => {
-    localStorage.removeItem("currentUser");
-    window.location.reload();
+    resetUser();
   };
 
   if (!currentUser) {
