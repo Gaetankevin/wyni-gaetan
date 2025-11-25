@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className="font-sans">
+      <body className="font-sans h-screen w-screen overflow-hidden">
         <ChatProvider>{children}</ChatProvider>
       </body>
     </html>
