@@ -104,6 +104,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
         addMessage: handleAddMessage,
         loadData,
         saveData,
+        isLoading,
       }}
     >
       {children}
