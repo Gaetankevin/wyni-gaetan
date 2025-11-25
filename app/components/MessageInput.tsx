@@ -15,6 +15,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isGaetan = currentUser === "Gaetan";
 
   const handleFileSelect = async (files: FileList | null) => {
     if (!files) return;
@@ -98,21 +99,25 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
   };
 
   return (
-    <div className="border-t border-gray-200 bg-white p-4">
+    <div className="p-6 space-y-4">
       {error && (
-        <div className="mb-3 rounded bg-red-100 p-2 text-sm text-red-700">
+        <div className="rounded-xl bg-red-500/20 border border-red-400/50 p-3 text-sm text-red-300 backdrop-blur">
           {error}
         </div>
       )}
 
       {mediaItems.length > 0 && (
-        <div className="mb-3 space-y-2">
-          <p className="text-sm font-medium text-gray-700">Fichiers attachés:</p>
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-gray-300">📎 Fichiers attachés:</p>
+          <div className="flex flex-wrap gap-3">
             {mediaItems.map((media) => (
               <div
                 key={media.id}
-                className="flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2"
+                className={`flex items-center gap-3 rounded-xl px-4 py-2 backdrop-blur transition-all duration-300 border ${
+                  isGaetan
+                    ? "bg-cyan-600/20 border-cyan-400/40 hover:bg-cyan-600/30"
+                    : "bg-purple-600/20 border-purple-400/40 hover:bg-purple-600/30"
+                }`}
               >
                 <span className="text-lg">
                   {media.type === "image"
@@ -121,12 +126,12 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
                       ? "🎥"
                       : "📄"}
                 </span>
-                <span className="truncate text-sm font-medium">
+                <span className="truncate text-sm font-medium text-white">
                   {media.filename}
                 </span>
                 <button
                   onClick={() => handleRemoveMedia(media.id)}
-                  className="text-gray-500 hover:text-red-500"
+                  className="text-gray-400 hover:text-red-400 transition-colors"
                 >
                   ✕
                 </button>
@@ -136,7 +141,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
         </div>
       )}
 
-      <div className="flex items-end gap-2">
+      <div className="flex items-end gap-3">
         <input
           type="file"
           multiple
@@ -149,10 +154,16 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-xl hover:bg-gray-200 disabled:opacity-50"
+          className={`group flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 backdrop-blur border disabled:opacity-50 focus:outline-none focus:ring-2 ${
+            isGaetan
+              ? "bg-cyan-600/20 border-cyan-400/40 hover:bg-cyan-600/30 focus:ring-cyan-400"
+              : "bg-purple-600/20 border-purple-400/40 hover:bg-purple-600/30 focus:ring-purple-400"
+          }`}
           title="Attacher un fichier"
         >
-          📎
+          <span className="text-xl group-hover:scale-110 transition-transform">
+            📎
+          </span>
         </button>
 
         <textarea
@@ -163,23 +174,31 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage }) => 
               handleSendMessage();
             }
           }}
-          placeholder="Écrivez votre message..."
-          className="flex-1 resize-none rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+          placeholder="Écrivez votre message mystérieux..."
+          className={`flex-1 resize-none rounded-xl px-4 py-3 backdrop-blur border transition-all duration-300 bg-slate-900/40 text-white placeholder-gray-500 focus:outline-none focus:ring-2 ${
+            isGaetan
+              ? "border-cyan-400/30 focus:border-cyan-400/60 focus:ring-cyan-400"
+              : "border-purple-400/30 focus:border-purple-400/60 focus:ring-purple-400"
+          }`}
           rows={3}
         />
 
         <button
           onClick={handleSendMessage}
           disabled={uploading || (!content.trim() && mediaItems.length === 0)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50"
+          className={`group flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 backdrop-blur border disabled:opacity-50 focus:outline-none focus:ring-2 hover:scale-105 active:scale-95 ${
+            isGaetan
+              ? "bg-gradient-to-br from-cyan-600/40 to-blue-600/40 border-cyan-400/40 hover:from-cyan-600/60 hover:to-blue-600/60 focus:ring-cyan-400"
+              : "bg-gradient-to-br from-purple-600/40 to-pink-600/40 border-purple-400/40 hover:from-purple-600/60 hover:to-pink-600/60 focus:ring-purple-400"
+          }`}
           title="Envoyer (Ctrl+Entrée)"
         >
-          ✈️
+          <span className="text-xl group-hover:animate-float">✈️</span>
         </button>
       </div>
 
-      <div className="mt-2 text-xs text-gray-500">
-        Ctrl + Entrée pour envoyer
+      <div className="text-xs text-gray-400 text-center">
+        ⌨️ Ctrl + Entrée pour envoyer
       </div>
     </div>
   );

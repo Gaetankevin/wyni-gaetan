@@ -25,10 +25,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
   isCurrentUser,
 }) => {
-  const userColor = message.sender === "Gaetan" ? "blue" : "pink";
-  const bgColor =
-    userColor === "blue" ? "bg-blue-100 text-blue-900" : "bg-pink-100 text-pink-900";
-  const messageColor = isCurrentUser ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-900";
+  const isGaetan = message.sender === "Gaetan";
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -39,56 +36,67 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   };
 
   return (
-    <div className={`flex ${isCurrentUser ? "justify-end" : "justify-start"} mb-4`}>
+    <div className={`flex ${isCurrentUser ? "justify-end" : "justify-start"} mb-6 animate-slide-up`}>
       <div className={`max-w-xs lg:max-w-md`}>
         <div
-          className={`rounded-lg px-4 py-2 ${
-            isCurrentUser ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-900"
+          className={`rounded-2xl px-6 py-4 backdrop-blur-md border transition-all duration-300 hover:scale-105 ${
+            isGaetan
+              ? "glass-effect border-cyan-400/40 shadow-glow-blue"
+              : "glass-effect-purple border-purple-400/40 shadow-glow-purple"
           }`}
         >
           {message.content && (
-            <p className="break-words whitespace-pre-wrap">{message.content}</p>
+            <p className="break-words whitespace-pre-wrap text-white font-medium leading-relaxed">
+              {message.content}
+            </p>
           )}
 
           {message.mediaItems.length > 0 && (
-            <div className={`mt-2 space-y-2 ${message.content ? "border-t pt-2" : ""} ${
-              isCurrentUser ? "border-blue-400" : "border-gray-300"
+            <div className={`mt-3 space-y-3 ${message.content ? "border-t pt-3" : ""} ${
+              isGaetan ? "border-cyan-400/30" : "border-purple-400/30"
             }`}>
               {message.mediaItems.map((media) => (
-                <div key={media.id} className="space-y-1">
+                <div key={media.id} className="space-y-2">
                   {media.type === "image" && (
                     <img
                       src={media.path}
                       alt={media.filename}
-                      className="max-h-48 max-w-48 rounded"
+                      className="max-h-48 max-w-48 rounded-xl border border-cyan-400/20 hover:border-cyan-400/60 transition-all duration-300 hover:shadow-lg"
                     />
                   )}
                   {media.type === "video" && (
                     <video
                       src={media.path}
                       controls
-                      className="max-h-48 max-w-48 rounded"
+                      className="max-h-48 max-w-48 rounded-xl border border-cyan-400/20 hover:border-cyan-400/60 transition-all duration-300"
                     />
                   )}
                   {media.type === "document" && (
                     <a
                       href={media.path}
                       download={media.filename}
-                      className={`flex items-center gap-2 rounded px-3 py-2 ${
-                        isCurrentUser
-                          ? "bg-blue-400 hover:bg-blue-600"
-                          : "bg-gray-300 hover:bg-gray-400"
+                      className={`flex items-center gap-3 rounded-xl px-4 py-3 backdrop-blur transition-all duration-300 hover:scale-105 border ${
+                        isGaetan
+                          ? "bg-cyan-600/20 border-cyan-400/40 hover:bg-cyan-600/30"
+                          : "bg-purple-600/20 border-purple-400/40 hover:bg-purple-600/30"
                       }`}
                     >
-                      <span className="text-lg">{getMediaIcon(media.type)}</span>
-                      <span className="truncate text-sm font-medium">
-                        {media.filename}
-                      </span>
+                      <span className="text-2xl">{getMediaIcon(media.type)}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="truncate text-sm font-semibold text-white block">
+                          {media.filename}
+                        </span>
+                        <span className="text-xs text-gray-300">
+                          {(media.size / 1024).toFixed(1)} KB
+                        </span>
+                      </div>
                     </a>
                   )}
-                  <p className="text-xs opacity-75">
-                    {(media.size / 1024).toFixed(1)} KB
-                  </p>
+                  {media.type !== "document" && (
+                    <p className="text-xs text-gray-300">
+                      {(media.size / 1024).toFixed(1)} KB
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -96,11 +104,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         </div>
 
         <div
-          className={`mt-1 text-xs ${
-            isCurrentUser ? "text-right text-gray-500" : "text-left text-gray-500"
+          className={`mt-2 text-xs ${
+            isCurrentUser ? "text-right text-gray-400" : "text-left text-gray-400"
           }`}
         >
-          {message.sender} • {formatTime(message.timestamp)}
+          <span className={isGaetan ? "glow-text-blue" : "glow-text-purple"}>
+            {message.sender}
+          </span>
+          {" • "}
+          <span>{formatTime(message.timestamp)}</span>
         </div>
       </div>
     </div>
