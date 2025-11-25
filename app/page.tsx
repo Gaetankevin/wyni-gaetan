@@ -20,15 +20,8 @@ export default function Home() {
 
   const handleSendMessage = async (message: Message) => {
     try {
-      // Save to state immediately for instant UI update
-      addMessage(message);
-
-      // Optionally persist to server (for future cloud sync if needed)
-      // await fetch("/api/messages", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(message),
-      // });
+      // Save to database via context
+      await addMessage(message);
     } catch (error) {
       console.error("Error sending message:", error);
     }
