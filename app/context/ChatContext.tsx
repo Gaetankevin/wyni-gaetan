@@ -12,6 +12,7 @@ interface ChatContextType {
   addMessage: (message: Message) => void;
   loadData: () => void;
   saveData: () => void;
+  isLoading: boolean;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -25,9 +26,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     wynonaa: null,
   });
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadData = () => {
     try {
+      if (typeof window === "undefined") return;
+
       const savedData = localStorage.getItem("chatData");
       if (savedData) {
         const data: ConversationData = JSON.parse(savedData);
@@ -41,11 +45,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } catch (error) {
       console.error("Error loading data:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const saveData = () => {
     try {
+      if (typeof window === "undefined") return;
       const data: ConversationData = { users, messages };
       localStorage.setItem("chatData", JSON.stringify(data));
     } catch (error) {
@@ -58,8 +65,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    saveData();
-  }, [users, messages]);
+    if (!isLoading) {
+      saveData();
+    }
+  }, [users, messages, isLoading]);
 
   const handleSetCurrentUser = (role: UserRole) => {
     setCurrentUser(role);
