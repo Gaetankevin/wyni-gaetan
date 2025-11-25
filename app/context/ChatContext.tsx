@@ -79,6 +79,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     setMessages((prev) => [...prev, message]);
   };
 
+  const handleResetUser = () => {
+    setCurrentUser(null);
+    localStorage.removeItem("currentUser");
+  };
+
   return (
     <ChatContext.Provider
       value={{
@@ -86,6 +91,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
         users,
         messages,
         setCurrentUser: handleSetCurrentUser,
+        resetUser: handleResetUser,
         addMessage: handleAddMessage,
         loadData,
         saveData,
