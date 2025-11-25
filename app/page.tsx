@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { RoleSelector } from "@/app/components/RoleSelector";
 import { ChatWindow } from "@/app/components/ChatWindow";
 import { useChat } from "@/app/context/ChatContext";
@@ -9,10 +9,20 @@ import { Message } from "@/app/types";
 export default function Home() {
   const { currentUser, messages, addMessage, loadData, resetUser } =
     useChat();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     loadData();
   }, [loadData]);
+
+  if (!mounted) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-gray-600">Initialisation...</div>
+      </div>
+    );
+  }
 
   const handleSendMessage = async (message: Message) => {
     try {
